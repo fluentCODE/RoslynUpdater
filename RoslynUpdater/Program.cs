@@ -12,6 +12,7 @@ namespace RoslynUpdater
         {
             new SolutionProcessor(@"W:\Projects\roslyn\Src")
                 .WithInternalsVisibleTo("Scrawl.CodeEngine.Roslyn")
+                .WithInternalsVisibleTo("Scrawl.Plugins.Roslyn")
                 .WithInternalsVisibleTo("OmniSharp")
                 .WithFindReplace(
                     @"Workspaces\Core\Portable\Workspace\Host\Mef\MefHostServices.cs",

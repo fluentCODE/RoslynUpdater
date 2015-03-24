@@ -81,10 +81,18 @@ namespace RoslynUpdater
             {
                 var visibleToPath = Path.Combine(SolutionDirectory, "InjectedInternalsVisibleTo.cs");
                 var internalsLines = InternalsVisibleToAssemblies.Select(x => $"[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"{x}\")]");
-                File.WriteAllLines(Path.Combine(SolutionDirectory, "InjectedInternalsVisibleTo.cs"), internalsLines.ToArray());
+                File.WriteAllLines(visibleToPath, internalsLines.ToArray());
+
+				var visibleToPathVb = Path.Combine(SolutionDirectory, "InjectedInternalsVisibleTo.vb");
+				var internalLinesVb = internalsVisibleToAssembliesHash.Select(x => $"<Assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"{x}\")>");
+				File.WriteAllLines(visibleToPathVb, internalLinesVb.ToArray());
+
                 foreach (var project in projectProcessors)
-                    project.WithLinkedFile(visibleToPath.MakeRelative(Path.GetDirectoryName(project.FilePath))).Save();
-            }
+					if (project.FilePath.EndsWith("csproj"))
+						project.WithLinkedFile(visibleToPath.MakeRelative(Path.GetDirectoryName(project.FilePath))).Save();
+					else if (project.FilePath.EndsWith("vbproj"))
+						project.WithLinkedFile(visibleToPathVb.MakeRelative(Path.GetDirectoryName(project.FilePath))).Save();
+			}
             else
             {
                 foreach (var project in projectProcessors)

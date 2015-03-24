@@ -85,10 +85,24 @@ namespace RoslynUpdater
             if (InternalsVisibleToAssemblies.Count > 0)
             {
                 var projectPath = Path.GetDirectoryName(FilePath);
-                var visibleToPath = Path.Combine(Path.GetDirectoryName(FilePath), "InjectedProjectInternalsVisibleTo.cs");
-                var internalsLines = InternalsVisibleToAssemblies.Select(x => $"[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"{x}\")]");
-                File.WriteAllLines(visibleToPath, internalsLines.ToArray());
-                WithLinkedFile(visibleToPath.MakeRelative(projectPath));
+				var extension = Path.GetExtension(FilePath);
+
+				string visibleToPath = null;
+				if (extension == ".csproj")
+				{
+					visibleToPath = Path.Combine(Path.GetDirectoryName(FilePath), "InjectedProjectInternalsVisibleTo.cs");
+					var internalsLines = InternalsVisibleToAssemblies.Select(x => $"[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"{x}\")]");
+					File.WriteAllLines(visibleToPath, internalsLines.ToArray());
+				}
+				else if (extension == ".vbproj")
+				{
+					visibleToPath = Path.Combine(Path.GetDirectoryName(FilePath), "InjectedProjectInternalsVisibleTo.vb");
+					var internalsLines = InternalsVisibleToAssemblies.Select(x => $"<Assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"{x}\")>");
+					File.WriteAllLines(visibleToPath, internalsLines.ToArray());
+				}
+
+				if (!string.IsNullOrEmpty(visibleToPath))
+					WithLinkedFile(visibleToPath.MakeRelative(projectPath));
             }
 
             Document.Save(FilePath);
